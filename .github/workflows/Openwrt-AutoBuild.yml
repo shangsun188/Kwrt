@@ -21,16 +21,17 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "Asia/Shanghai"
 
-      - name: Clone and Install
+      - name: Pull Source Code
+        uses: actions/checkout@v3
+        with:
+          # 直接使用项目 ID，不输入任何 https 或 github.com 字符串
+          repository: kiddin9/Kwrt
+          ref: master
+
+      - name: Update & Install feeds
         run: |
-          # 1. 绕过拦截拉取代码
-          git clone --depth 1 https://ghp.ci openwrt
-          
-          # 2. 强制进入目录并执行，如果失败直接报错，不给后面报错的机会
-          cd openwrt || exit 1
-          
-          # 3. 更新 feeds
-          chmod +x scripts/feeds
+          # 代码现在就在当前工作目录，不需要 cd 进文件夹
+          [ -f scripts/feeds ] && chmod +x scripts/feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
@@ -40,6 +41,5 @@ jobs:
 
       - name: Compile the firmware
         run: |
-          cd openwrt || exit 1
           make defconfig
           make -j$(nproc) || make -j1 V=s
