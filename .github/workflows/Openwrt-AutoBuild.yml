@@ -37,8 +37,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        ADDR="://github.com"
-        git clone --depth 1 https://$ADDR -b master openwrt
+        git clone --depth 1 https://ghproxy.com -b master openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Update & Install feeds
