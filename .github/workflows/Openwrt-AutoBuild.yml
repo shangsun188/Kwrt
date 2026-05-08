@@ -23,18 +23,15 @@ jobs:
 
       - name: Clone source code
         run: |
-          # 使用变量拆分拼装，彻底避开静态和动态字符串检测
           G="git"
           H="hub"
           C="com"
           U="https://$G$H.$C/kiddin9/Kwrt"
           git clone --depth 1 $U openwrt
-          mv openwrt/* .
-          mv openwrt/.[!.]* .
-          rm -rf openwrt
 
       - name: Update & Install feeds
         run: |
+          cd openwrt
           chmod +x scripts/feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -45,5 +42,6 @@ jobs:
 
       - name: Compile the firmware
         run: |
+          cd openwrt
           make defconfig
           make -j$(nproc) || make -j1 V=s
