@@ -37,7 +37,8 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone --depth 1 https://github.com -b master openwrt
+        ADDR="://github.com"
+        git clone --depth 1 https://$ADDR -b master openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Update & Install feeds
