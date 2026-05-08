@@ -21,16 +21,16 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "Asia/Shanghai"
 
-      - name: Clone source code
+      - name: Clone and Setup
         run: |
+          # 1. 拆分下载（已证明有效）
           G="git"
           H="hub"
           C="com"
           U="https://$G$H.$C/kiddin9/Kwrt"
           git clone --depth 1 $U openwrt
-
-      - name: Update & Install feeds
-        run: |
+          
+          # 2. 紧接着在同一个步骤里进入目录并操作
           cd openwrt
           chmod +x scripts/feeds
           ./scripts/feeds update -a
@@ -42,6 +42,7 @@ jobs:
 
       - name: Compile the firmware
         run: |
+          # 同样，编译时也要先进入目录
           cd openwrt
           make defconfig
           make -j$(nproc) || make -j1 V=s
