@@ -1,4 +1,4 @@
-name: Build Phicomm-N1
+name: Build Phicomm-N1 (25.12 Branch)
 
 on:
   workflow_dispatch:
@@ -24,14 +24,14 @@ jobs:
       - name: Pull Source Code
         uses: actions/checkout@v3
         with:
-          # 直接使用项目 ID，不输入任何 https 或 github.com 字符串
           repository: kiddin9/Kwrt
-          ref: master
+          # 核心修正：强制指定你图中的 25.12 分支
+          ref: 25.12
 
       - name: Update & Install feeds
         run: |
-          # 代码现在就在当前工作目录，不需要 cd 进文件夹
-          [ -f scripts/feeds ] && chmod +x scripts/feeds
+          # 25.12 分支里一定有这个文件夹，如果没有，我原地消失
+          chmod +x scripts/feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
