@@ -12,12 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: kiddin9/Kwrt
-          ref: master
-
       - name: Initialization environment
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
@@ -27,8 +21,17 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "Asia/Shanghai"
 
+      - name: Clone source code
+        run: |
+          git clone --depth 1 https://github.com openwrt
+          # 这一步非常关键：把 openwrt 文件夹里的内容全部移动到当前根目录
+          mv openwrt/* .
+          mv openwrt/.[!.]* .
+          rm -rf openwrt
+
       - name: Update & Install feeds
         run: |
+          chmod +x scripts/feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
