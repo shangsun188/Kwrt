@@ -23,15 +23,14 @@ jobs:
 
       - name: Clone and Setup
         run: |
-          # 1. 拆分下载（已证明有效）
           G="git"
           H="hub"
           C="com"
           U="https://$G$H.$C/kiddin9/Kwrt"
-          git clone --depth 1 $U openwrt
+          # 直接克隆到当前工作目录，不创建子文件夹
+          git clone --depth 1 $U .
           
-          # 2. 紧接着在同一个步骤里进入目录并操作
-          cd openwrt
+          # 这样脚本绝对就在当前目录下
           chmod +x scripts/feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -42,7 +41,6 @@ jobs:
 
       - name: Compile the firmware
         run: |
-          # 同样，编译时也要先进入目录
-          cd openwrt
+          # 已经在根目录了，直接执行
           make defconfig
           make -j$(nproc) || make -j1 V=s
