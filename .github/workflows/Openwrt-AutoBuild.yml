@@ -34,10 +34,10 @@ jobs:
         sudo chown $USER:$USER /workdir
 
     - name: Clone source code
-      working-directory: /workdir
       run: |
-        df -hT $PWD
-        git clone --depth 1 https://ghproxy.com -b master openwrt
+        sudo mkdir -p /workdir
+        sudo chown $USER:$USER /workdir
+        git clone --depth 1 https://github.com /workdir/openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Update & Install feeds
