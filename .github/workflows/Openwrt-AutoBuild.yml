@@ -1,4 +1,4 @@
-name: Build Phicomm-N1 (25.12 Branch)
+name: Build Phicomm-N1 (Strict Fix)
 
 on:
   workflow_dispatch:
@@ -25,15 +25,30 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: kiddin9/Kwrt
-          # 核心修正：强制指定你图中的 25.12 分支
           ref: 25.12
 
       - name: Update & Install feeds
         run: |
-          # 25.12 分支里一定有这个文件夹，如果没有，我原地消失
-          chmod +x scripts/feeds
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          # 严谨改正：列出所有文件，看看代码到底在哪
+          echo "正在搜索源码结构..."
+          ls -R | grep "scripts" || echo "根目录没找到 scripts"
+          
+          # 自动寻找 scripts/feeds 的绝对路径
+          FEEDS_PATH=$(find . -name feeds -path "*/scripts/feeds" | head -n 1)
+          
+          if [ -n "$FEEDS_PATH" ]; then
+            SRC_DIR=$(dirname $(dirname "$FEEDS_PATH"))
+            echo "找到源码目录: $SRC_DIR"
+            cd "$SRC_DIR"
+            chmod +x scripts/feeds
+            ./scripts/feeds update -a
+            ./scripts/feeds install -a
+            # 把这个正确的路径传给后面的步骤
+            echo "FINAL_SRC_DIR=$PWD" >> $GITHUB_ENV
+          else
+            echo "错误：在此分支中完全找不到 scripts/feeds！"
+            exit 1
+          fi
 
       - name: SSH connection to Actions
         uses: P3TERX/ssh2actions@main
@@ -41,5 +56,6 @@ jobs:
 
       - name: Compile the firmware
         run: |
+          cd ${{ env.FINAL_SRC_DIR }}
           make defconfig
           make -j$(nproc) || make -j1 V=s
