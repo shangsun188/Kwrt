@@ -12,6 +12,15 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        with:
+          # 直接拉取原作者仓库，避开你自己仓库的干扰
+          repository: kiddin9/Kwrt
+          ref: master
+          # 明确指定下载到 openwrt 文件夹，不破坏根目录
+          path: openwrt
+
       - name: Initialization environment
         run: |
           sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
@@ -21,19 +30,10 @@ jobs:
           sudo -E apt-get -qq clean
           sudo timedatectl set-timezone "Asia/Shanghai"
 
-      - name: Clone and Setup
+      - name: Update & Install feeds
+        # 核心改动：用 working-directory 强制指定运行路径
+        working-directory: ./openwrt
         run: |
-          # 1. 彻底清空当前目录，确保 git clone . 能够成功执行
-          sudo rm -rf ./* ./.[!.]*
-          
-          # 2. 使用变量拆分下载（避开拦截）
-          G="git"
-          H="hub"
-          C="com"
-          U="https://$G$H.$C/kiddin9/Kwrt"
-          git clone --depth 1 $U .
-          
-          # 3. 此时源码已经在根目录，直接执行脚本
           chmod +x scripts/feeds
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -43,6 +43,7 @@ jobs:
         if: (github.event.inputs.ssh == 'true' && github.event_name == 'workflow_dispatch')
 
       - name: Compile the firmware
+        working-directory: ./openwrt
         run: |
           make defconfig
           make -j$(nproc) || make -j1 V=s
